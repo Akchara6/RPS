@@ -1,0 +1,94 @@
+import random
+import tkinter as tk
+
+# Choices
+choices = ["rock", "paper", "scissors"]
+
+# Dictionary to track user move frequency
+user_moves = {"rock": 0, "paper": 0, "scissors": 0}
+
+# Score tracking
+user_score = 0
+ai_score = 0
+ties = 0
+
+def predict_next_move():
+    """Predicts the user's next move with more randomness."""
+    if sum(user_moves.values()) == 0:
+        return random.choice(choices)  # First move is random
+    
+    predicted_move = max(user_moves, key=user_moves.get)  # Most played move
+    counter_move = {"rock": "paper", "paper": "scissors", "scissors": "rock"}
+
+    rand_choice = random.random()
+
+    if rand_choice < 0.5:  
+        return counter_move[predicted_move]  # 50% Counter your move
+    elif rand_choice < 0.8:  
+        return random.choice(choices)  # 30% Random choice
+    else:
+        return predicted_move  # 20% AI plays the move you use the most
+
+def play(user_choice):
+    """Handles the game logic when the user selects a move."""
+    global user_score, ai_score, ties
+
+    ai_choice = predict_next_move()  # AI pre-predicts a move
+
+    # Determine winner
+    if user_choice == ai_choice:
+        result = "It's a tie!"
+        ties += 1
+    elif (user_choice == "rock" and ai_choice == "scissors") or \
+         (user_choice == "paper" and ai_choice == "rock") or \
+         (user_choice == "scissors" and ai_choice == "paper"):
+        result = "You win!"
+        user_score += 1
+    else:
+        result = "AI wins!"
+        ai_score += 1
+
+    # Store user move AFTER displaying results
+    user_moves[user_choice] += 1  
+
+    # Update the labels at the same time
+    user_choice_label.config(text=f"You chose: {user_choice}")
+    ai_choice_label.config(text=f"AI chose: {ai_choice}")
+    result_label.config(text=result)
+    score_label.config(text=f"Score: You {user_score} - AI {ai_score} - Ties {ties}")
+
+# Create the main window
+root = tk.Tk()
+root.title("Rock Paper Scissors - AI")
+root.geometry("400x500")
+root.configure(bg="#f0f0f0")
+
+# Labels
+tk.Label(root, text="Rock Paper Scissors", font=("Arial", 18, "bold"), bg="#f0f0f0").pack(pady=10)
+user_choice_label = tk.Label(root, text="You chose: ?", font=("Arial", 14), bg="#f0f0f0")
+user_choice_label.pack()
+ai_choice_label = tk.Label(root, text="AI chose: ?", font=("Arial", 14), bg="#f0f0f0")
+ai_choice_label.pack()
+result_label = tk.Label(root, text="", font=("Arial", 14, "bold"), bg="#f0f0f0", fg="blue")
+result_label.pack(pady=10)
+
+# Buttons
+btn_frame = tk.Frame(root, bg="#f0f0f0")
+btn_frame.pack(pady=10)
+rock_btn = tk.Button(btn_frame, text="Rock 🪨", font=("Arial", 14), command=lambda: play("rock"), width=10)
+rock_btn.grid(row=0, column=0, padx=5)
+paper_btn = tk.Button(btn_frame, text="Paper 📄", font=("Arial", 14), command=lambda: play("paper"), width=10)
+paper_btn.grid(row=0, column=1, padx=5)
+scissors_btn = tk.Button(btn_frame, text="Scissors ✂", font=("Arial", 14), command=lambda: play("scissors"), width=10)
+scissors_btn.grid(row=0, column=2, padx=5)
+
+# Score Label
+score_label = tk.Label(root, text="Score: You 0 - AI 0 - Ties 0", font=("Arial", 14, "bold"), bg="#f0f0f0")
+score_label.pack(pady=20)
+
+# Quit Button
+quit_btn = tk.Button(root, text="Quit", font=("Arial", 14), command=root.quit, bg="red", fg="white", width=10)
+quit_btn.pack(pady=10)
+
+# Run the GUI
+root.mainloop()
